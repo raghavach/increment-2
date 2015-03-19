@@ -1,0 +1,314 @@
+package com.example.bussinessanalsis;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.text.InputType;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.example.bussinessanalsis.database.DataBaseConector;
+
+public class EditActivity extends Activity implements OnClickListener {
+	   DatePicker picker;
+		Button displayDate;
+		EditText et;
+		private SharedPreferences prefs;
+	    private String prefName = "spinner_value";
+	    int id=0;
+	    Button cal;
+	    String oper = "";
+	    String discrption,price,tag,note,date,sppinervalue;
+	    Spinner sp;
+	    DataBaseConector dbconnector;
+	    //UI References
+	 EditText fromDateEtxt,et_discription,et_tag,et_price,et_note;
+	 
+	    Button b1,clear;
+	    EditText etNum1;
+		  EditText etNum2;
+
+		  Button btnAdd;
+		  Button btnSave,btnSub;
+		  Button btnMult;
+		  Button btnDiv;
+	    private DatePickerDialog fromDatePickerDialog;
+	    
+	    
+	    private SimpleDateFormat dateFormatter;
+	    
+	    @Override
+	    protected void onCreate(Bundle savedInstanceState) {
+	        super.onCreate(savedInstanceState);
+	        setContentView(R.layout.add_register_itam);
+	        cal=(Button)findViewById(R.id.btn_cal);
+	        btnSave=(Button)findViewById(R.id.btn_save);
+	        dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+	        dbconnector=new DataBaseConector(this);
+	        Intent i = getIntent();
+	        String result=i.getStringExtra("result");
+	        Log.i("the inent values",result);
+	     /*   etNum1 = (EditText) findViewById(R.id.etNum1);
+		    etNum2 = (EditText) findViewById(R.id.etNum2);*/
+		    
+		    et_discription = (EditText) findViewById(R.id.editText1);
+		    et_tag = (EditText) findViewById(R.id.editText2);
+		    et_price = (EditText) findViewById(R.id.editText3);
+		    et_note = (EditText) findViewById(R.id.editText4);
+
+		    btnSave.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					//price,tag,note;
+					
+					SharedPreferences prefs = getSharedPreferences("", MODE_PRIVATE); 
+					String userid = prefs.getString("userid", "");
+					discrption=	et_discription.getText().toString();
+					price =	et_tag.getText().toString();
+					tag=	et_price.getText().toString();
+					note=et_note.getText().toString();
+					date=fromDateEtxt.getText().toString();
+					sppinervalue=sp.getSelectedItem().toString();
+					Log.i("the vlaues",discrption+"||"+price+"||"+tag+"||"+note+"||"+date+"||"+sppinervalue);
+					ContentValues additems= new ContentValues();
+					//(reg_userid text, discrption text, price text,tag text,note text,date text,sppinervalue text )";		
+					additems.put("reg_userid", userid);
+					additems.put("discrption", discrption);
+					additems.put("price", price);
+					additems.put("tag", tag);
+					additems.put("note", note);
+					additems.put("date", date);
+					additems.put("sppinervalue", sppinervalue);
+					Log.i("the inserted items",additems.toString());
+					dbconnector.insert_items(additems);
+				}
+			}) ;
+
+		  
+	        cal.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					LayoutInflater li = LayoutInflater.from(getBaseContext());
+					View promptsView = li.inflate(R.layout.calc, null);
+					/* btnAdd = (Button) findViewById(R.id.btnAdd);
+					    btnSub = (Button) findViewById(R.id.btnSub);
+					    btnMult = (Button) findViewById(R.id.btnMult);
+					    btnDiv = (Button) findViewById(R.id.btnDiv);*/
+					    
+					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+							EditActivity.this);
+					alertDialogBuilder.setView(promptsView);
+					alertDialogBuilder
+					.setCancelable(false)
+					.setPositiveButton("OK",
+					  new DialogInterface.OnClickListener() {
+					    public void onClick(DialogInterface dialog,int id) {
+					    	
+					    }
+					  })
+					  .setNegativeButton("Cancel",
+							  new DialogInterface.OnClickListener() {
+							    public void onClick(DialogInterface dialog,int id) {
+								dialog.cancel();
+							    }
+							  });
+		 
+						// create alert dialog
+						AlertDialog alertDialog = alertDialogBuilder.create();
+		 
+						// show it
+						alertDialog.show();
+		 
+					}
+					    
+					
+				
+			});
+	        findViewsById();
+	        
+	        setDateTimeField();
+	        List<String> list=new ArrayList<String>();
+	        list.add("Select a categorized");
+	        list.add("Uncategorized");
+	        list.add("Bills");
+	        list.add("Clothing");
+	        list.add("Deposit");
+	        list.add("Eating Out");
+	        list.add("Entertainment");
+	        list.add("Gifts");
+	        list.add("Groceries");
+	        list.add("Insurance");
+	        list.add(" Medical");
+	        list.add(" Payment");
+	        list.add("Rent");
+	        list.add("Salary");
+	        list.add("Shopping");
+	        list.add("Transfer");
+	        list.add("Transportation");
+	        list.add("Utilities");
+	        
+	         sp=(Spinner) findViewById(R.id.spinner1);
+	       b1=(Button)findViewById(R.id.button2);
+	       clear=(Button)findViewById(R.id.button3);
+	       b1.setTextColor( Color.RED );
+	       
+	        b1.setOnClickListener( new OnClickListener() {
+
+	            @Override
+	            public void onClick(View v) {
+	               
+	                b1.setText("Income");
+	                b1.setTextColor(Color.GREEN );
+	            }
+	        });
+	        
+	        ArrayAdapter<String> adp= new ArrayAdapter<String>(this,
+	                                    android.R.layout.simple_list_item_1,list);
+	        adp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	        sp.setAdapter(adp);
+
+	        prefs = getSharedPreferences(prefName, MODE_PRIVATE);
+	        id=prefs.getInt("last_val",0);
+	        sp.setSelection(id);
+
+	        sp.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+	            @Override
+	            public void onItemSelected(AdapterView<?> arg0, 
+	                View arg1,int pos, long arg3) {
+
+	            prefs = getSharedPreferences(prefName, MODE_PRIVATE);
+	            SharedPreferences.Editor editor = prefs.edit();
+	            //---save the values in the EditText view to preferences---
+	            editor.putInt("last_val", pos);
+
+	            editor.commit();
+
+	            Toast.makeText(getBaseContext(), 
+	                sp.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+	        }
+	        @Override
+	        public void onNothingSelected(AdapterView<?> arg0) {
+	            // TODO Auto-generated method stub                   
+	        }
+
+
+	    });               
+	    
+	    clear.setOnClickListener(new OnClickListener() {
+	    	 
+			@Override
+			public void onClick(View arg0) {
+	 
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditActivity.this);
+	 
+				// set title
+				alertDialogBuilder.setTitle("Do You Want To Clear");
+	 
+				// set dialog message
+				alertDialogBuilder
+					.setMessage("Clear form?")
+					.setCancelable(false)
+					.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,int id) {
+							// if this button is clicked, close
+							// current activity
+							clear();
+							//Additems.this.finish();
+						}
+
+						
+					  })
+					.setNegativeButton("No",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,int id) {
+							// if this button is clicked, just close
+							// the dialog box and do nothing
+							dialog.cancel();
+						}
+					});
+	 
+					// create alert dialog
+					AlertDialog alertDialog = alertDialogBuilder.create();
+	 
+					// show it
+					alertDialog.show();
+				}
+			});
+	    }
+	    
+		
+	    private void findViewsById() {
+	        fromDateEtxt = (EditText) findViewById(R.id.editText5);    
+	        fromDateEtxt.setInputType(InputType.TYPE_NULL);
+	        fromDateEtxt.requestFocus();
+	        
+	        
+	    }
+	 
+	    private void setDateTimeField() {
+	        fromDateEtxt.setOnClickListener(this);
+	     
+	        
+	        Calendar newCalendar = Calendar.getInstance();
+	        fromDatePickerDialog = new DatePickerDialog(this, new OnDateSetListener() {
+	 
+	            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+	                Calendar newDate = Calendar.getInstance();
+	                newDate.set(year, monthOfYear, dayOfMonth);
+	                fromDateEtxt.setText(dateFormatter.format(newDate.getTime()));
+	            }
+	 
+	        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+	        
+	    }
+	    
+	    @Override
+	    public boolean onCreateOptionsMenu(Menu menu) {
+	        // Inflate the menu; this adds items to the action bar if it is present.
+	        getMenuInflater().inflate(R.menu.main, menu);
+	        return true;
+	    }
+	    private void clear() {
+	    	fromDateEtxt.setText(" ");
+	    	et_discription.setText("");
+	    	et_tag.setText(" ");
+	    	et_price.setText(" ");
+	    	et_note.setText(""); 
+		}
+	   
+	    @Override
+	    public void onClick(View view) {
+	        if(view == fromDateEtxt) {
+	            fromDatePickerDialog.show();
+	        
+	  	 
+	    }  
+	    } 
+	}
